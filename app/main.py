@@ -2,16 +2,19 @@ from graphics.config import *
 import graphics.engine as engine
 import app.engine.scene as scene
 import vklogging
+import app.engine.mouse as mouse
 
-class App:
+class App(object):
 
     def __init__(self, width, height, debugMode):
 
         vklogging.logger.set_debug_mode(debugMode)
 
+        self.mouse = mouse.MouseHandler()
         self.build_glfw_window(width, height)
 
         self.graphicsEngine = engine.Engine(width, height, self.window)
+        self.graphicsEngine.mouse = self.mouse
 
         self.scene = scene.Scene()
 
@@ -38,6 +41,12 @@ class App:
             )
         else:
             vklogging.logger.print("GLFW window creation failed")
+
+        # mouse callback
+        glfw.set_input_mode(self.window, glfw.CURSOR, glfw.CURSOR_NORMAL)
+        glfw.set_cursor_pos_callback(self.window, self.mouse.mouse_move)
+        glfw.set_mouse_button_callback(self.window, self.mouse.mouse_pressed)
+        glfw.set_scroll_callback(self.window, self.mouse.mouse_wheel)
 
     def calculate_framerate(self):
 

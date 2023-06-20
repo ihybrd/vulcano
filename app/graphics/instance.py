@@ -114,7 +114,8 @@ def make_instance(applicationName):
     layers = []
     if vklogging.logger.debug_mode:
         layers.append("VK_LAYER_KHRONOS_validation")
-        layers.append("VK_LAYER_RENDERDOC_Capture")
+        if not is_darwin:
+            layers.append("VK_LAYER_RENDERDOC_Capture")
 
     supported(extensions, layers)
 

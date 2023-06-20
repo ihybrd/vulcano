@@ -11,6 +11,7 @@ import vertex_menagerie
 import descriptors
 import frame
 from app.engine import scene
+from app.engine import camera
 import image
 import app.resource_manager.asset as asset
 
@@ -34,6 +35,9 @@ class Engine:
         self.make_pipeline()
         self.finalize_setup()
         self.make_assets()
+
+        self.mouse = None
+        self.camera = camera.Camera()
     
     def make_instance(self):
 
@@ -283,7 +287,7 @@ class Engine:
         for (objectType, filename) in filenames.items():
             textureInfo.filename = filename
             self.materials[objectType] = image.Texture(textureInfo)
-    
+
     def prepare_frame(self, imageIndex: int, _scene: scene.Scene) -> None:
 
         _frame: frame.SwapChainFrame = self.swapchainFrames[imageIndex]
@@ -291,7 +295,10 @@ class Engine:
         position = np.array([1, 0, -1],dtype=np.float32)
         target = np.array([0, 0, 0],dtype=np.float32)
         up = np.array([0, 0, -1],dtype=np.float32)
-        _frame.cameraData.view = pyrr.matrix44.create_look_at(position, target, up, dtype=np.float32)
+        # _frame.cameraData.view = pyrr.matrix44.create_look_at(position, target, up, dtype=np.float32)
+        self.mouse.update()
+        self.camera.update(self.mouse)
+        _frame.cameraData.view = self.camera.view()
 
         fov = 45
         aspect = self.swapchainExtent.width/float(self.swapchainExtent.height)
