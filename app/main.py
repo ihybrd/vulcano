@@ -1,7 +1,7 @@
 from graphics.config import *
 import graphics.engine as engine
-import graphics.scene as scene
-import graphics.vklogging as vklogging
+import app.engine.scene as scene
+import vklogging
 
 class App:
 

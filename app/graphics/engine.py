@@ -10,8 +10,9 @@ import sync
 import vertex_menagerie
 import descriptors
 import frame
-import scene
+from app.engine import scene
 import image
+import app.resource_manager.asset as asset
 
 class Engine:
 
@@ -233,63 +234,19 @@ class Engine:
         self.make_frame_resources()
 
     def make_assets(self):
-
+        ass = asset.Asset()
         #Meshes
         self.meshes = vertex_menagerie.VertexMenagerie()
-        
-        vertices = np.array(
-            (
-                 0.0, -0.1, 0.0, 1.0, 0.0, 0.5, 0.0, #0
-                 0.1,  0.1, 0.0, 1.0, 0.0, 1.0, 1.0, #1
-                -0.1,  0.1, 0.0, 1.0, 0.0, 0.0, 1.0  #2
-            ), dtype = np.float32
-        )
-        indices = [0, 1, 2]
 
+        vertices, indices = ass.load_triangle()
         meshType = TRIANGLE
         self.meshes.consume(meshType, vertices, indices)
 
-        vertices = np.array(
-            (
-                -0.1,  0.1, 1.0, 0.0, 0.0, 0.0, 1.0, #0
-		        -0.1, -0.1, 1.0, 0.0, 0.0, 0.0, 0.0, #1
-		         0.1, -0.1, 1.0, 0.0, 0.0, 1.0, 0.0, #2
-		         0.1,  0.1, 1.0, 0.0, 0.0, 1.0, 1.0, #3
-            ), dtype = np.float32
-        )
-        indices = [
-            0, 1, 2,
-            2, 3, 0
-        ]
-
+        vertices, indices = ass.load_square()
         meshType = SQUARE
         self.meshes.consume(meshType, vertices, indices)
 
-        vertices = np.array(
-            (
-                 -0.1, -0.05, 1.0, 1.0, 1.0, 0.0, 0.25, #0
-		        -0.04, -0.05, 1.0, 1.0, 1.0, 0.3, 0.25, #1
-		        -0.06,   0.0, 1.0, 1.0, 1.0, 0.2,  0.5, #2
-		          0.0,  -0.1, 1.0, 1.0, 1.0, 0.5,  0.0, #3
-		         0.04, -0.05, 1.0, 1.0, 1.0, 0.7, 0.25, #4
-		          0.1, -0.05, 1.0, 1.0, 1.0, 1.0, 0.25, #5
-		         0.06,   0.0, 1.0, 1.0, 1.0, 0.8,  0.5, #6
-		         0.08,   0.1, 1.0, 1.0, 1.0, 0.9,  1.0, #7
-		          0.0,  0.02, 1.0, 1.0, 1.0, 0.5,  0.6, #8
-		        -0.08,   0.1, 1.0, 1.0, 1.0, 0.1,  1.0  #9
-            ), dtype = np.float32
-        )
-        indices = [
-            0, 1, 2,
-            1, 3, 4,
-            2, 1, 4,
-            4, 5, 6,
-            2, 4, 6,
-            6, 7, 8,
-            2, 6, 8,
-            2, 8, 9
-        ]
-
+        vertices, indices = ass.load_star()
         meshType = STAR
         self.meshes.consume(meshType, vertices, indices)
 
@@ -366,7 +323,7 @@ class Engine:
             i += 1
         
         for position in _scene.square_positions:
-            
+
             _frame.modelTransforms[i] = pyrr.matrix44.create_from_translation(
                 vec = position, dtype = np.float32
             )
