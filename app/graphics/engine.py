@@ -142,7 +142,26 @@ class Engine:
             self.device, bindings
         )
 
+    def get_sdk_version(self, sdk_root):
+        for v in os.listdir(sdk_root):
+            if os.path.isdir(os.path.join(sdk_root, v)) and v.count('.') == 3: # ver = 1.3.234.0
+                return v
+        return "1.0.0.0"
+
     def make_pipeline(self):
+
+        if is_darwin:
+            home = os.environ['HOME']
+            ver = self.get_sdk_version(home+"/VulkanSDK")
+            cmd1 = home+"/VulkanSDK/{0}/macOS/bin/glslc graphics/shaders/shader.vert -o graphics/shaders/vert.spv".format(ver)
+            cmd2 = home+"/VulkanSDK/{0}/macOS/bin/glslc graphics/shaders/shader.frag -o graphics/shaders/frag.spv".format(ver)
+        else:
+            ver = self.get_sdk_version(r"c:\VulkanSDK")
+            cmd1 = r"C:\VulkanSDK\{0}\Bin\glslc.exe graphics\shaders\shader.vert -o graphics\shaders\vert.spv".format(ver)
+            cmd2 = r"C:\VulkanSDK\{0}\Bin\glslc.exe graphics\shaders\shader.frag -o graphics\shaders\frag.spv".format(ver)
+
+        os.system(cmd1.strip())
+        os.system(cmd2.strip())
 
         inputBundle = pipeline.InputBundle(
             device = self.device,
