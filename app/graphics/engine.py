@@ -36,12 +36,15 @@ class Engine:
         self.finalize_setup()
         self.make_assets()
 
-        self.mouse = None
+        self.input = None
         self.camera = camera.Camera()
+        self.camera_wasd = camera.CameraWasd()
+
+        self.use_wasd_cam = True
     
     def make_instance(self):
 
-        self.instance = instance.make_instance("ID tech 12")
+        self.instance = instance.make_instance("")
 
         if vklogging.logger.debug_mode:
             self.debugMessenger = vklogging.make_debug_messenger(self.instance)
@@ -315,9 +318,16 @@ class Engine:
         target = np.array([0, 0, 0],dtype=np.float32)
         up = np.array([0, 0, -1],dtype=np.float32)
         # _frame.cameraData.view = pyrr.matrix44.create_look_at(position, target, up, dtype=np.float32)
-        self.mouse.update()
-        self.camera.update(self.mouse)
-        _frame.cameraData.view = self.camera.view()
+        self.input.update()
+
+        if self.input.keyboard_handler.mode:
+            self.camera_wasd.update(*self.input.load_camera_data())
+            view = self.camera_wasd.view()
+        else:
+            self.camera.update(self.input.mouse_handler)
+            view = self.camera.view()
+
+        _frame.cameraData.view = view
 
         fov = 45
         aspect = self.swapchainExtent.width/float(self.swapchainExtent.height)

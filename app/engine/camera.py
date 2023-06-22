@@ -179,7 +179,7 @@ class CameraWasd(BaseCamera):
     def view(self):
         return self.__view
 
-    def update(self, mouse_obj, move_x, move_y, move_z, rot_x, rot_y):
+    def update(self, move_x, move_y, move_z, rot_x, rot_y):
         self.move_x = move_x
         self.move_y = move_y
         self.move_z = move_z

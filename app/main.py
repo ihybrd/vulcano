@@ -2,7 +2,7 @@ from graphics.config import *
 import graphics.engine as engine
 import app.engine.scene as scene
 import vklogging
-import app.engine.mouse as mouse
+import app.engine.input_manager as input_manager
 
 class App(object):
 
@@ -10,11 +10,12 @@ class App(object):
 
         vklogging.logger.set_debug_mode(debugMode)
 
-        self.mouse = mouse.MouseHandler()
+        self.input_manager = input_manager.InputStateManager()
+
         self.build_glfw_window(width, height)
 
         self.graphicsEngine = engine.Engine(width, height, self.window)
-        self.graphicsEngine.mouse = self.mouse
+        self.graphicsEngine.input = self.input_manager
 
         self.scene = scene.Scene()
 
@@ -44,9 +45,12 @@ class App(object):
 
         # mouse callback
         glfw.set_input_mode(self.window, glfw.CURSOR, glfw.CURSOR_NORMAL)
-        glfw.set_cursor_pos_callback(self.window, self.mouse.mouse_move)
-        glfw.set_mouse_button_callback(self.window, self.mouse.mouse_pressed)
-        glfw.set_scroll_callback(self.window, self.mouse.mouse_wheel)
+        glfw.set_cursor_pos_callback(self.window, self.input_manager.mouse_handler.mouse_move)
+        glfw.set_mouse_button_callback(self.window, self.input_manager.mouse_handler.mouse_pressed)
+        glfw.set_scroll_callback(self.window, self.input_manager.mouse_handler.mouse_wheel)
+
+        # keyboard callback
+        glfw.set_key_callback(self.window, self.input_manager.keyboard_handler.key_pressed)
 
     def calculate_framerate(self):
 
