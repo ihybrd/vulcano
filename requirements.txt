@@ -3,3 +3,4 @@ glfw
 numpy
 pyrr
 Pillow
+assimp-py

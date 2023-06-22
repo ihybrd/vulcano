@@ -1,6 +1,6 @@
 #version 450
 
-layout(location = 0) in vec2 vertexPosition;
+layout(location = 0) in vec3 vertexPosition;
 layout(location = 1) in vec3 vertexColor;
 layout(location = 2) in vec2 vertexTexCoord;
 
@@ -18,7 +18,7 @@ layout (set = 0, binding = 1) readonly buffer StorageBuffer {
 } ObjectData;
 
 void main() {
-	gl_Position = CameraData.viewProjection * ObjectData.model[gl_InstanceIndex] * vec4(vertexPosition, 0.0, 1.0);
+	gl_Position = CameraData.viewProjection * ObjectData.model[gl_InstanceIndex] * vec4(vertexPosition, 1.0);
 	fragColor = vertexColor;
 	fragTexCoord = vertexTexCoord;
 }

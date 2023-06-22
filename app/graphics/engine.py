@@ -156,9 +156,9 @@ class Engine:
             cmd1 = home+"/VulkanSDK/{0}/macOS/bin/glslc graphics/shaders/shader.vert -o graphics/shaders/vert.spv".format(ver)
             cmd2 = home+"/VulkanSDK/{0}/macOS/bin/glslc graphics/shaders/shader.frag -o graphics/shaders/frag.spv".format(ver)
         else:
-            ver = self.get_sdk_version(r"c:\VulkanSDK")
-            cmd1 = r"C:\VulkanSDK\{0}\Bin\glslc.exe graphics\shaders\shader.vert -o graphics\shaders\vert.spv".format(ver)
-            cmd2 = r"C:\VulkanSDK\{0}\Bin\glslc.exe graphics\shaders\shader.frag -o graphics\shaders\frag.spv".format(ver)
+            home = os.environ["VK_LAYER_PATH"]
+            cmd1 = home + r"\glslc.exe graphics\shaders\shader.vert -o graphics\shaders\vert.spv"
+            cmd2 = home + r"\glslc.exe graphics\shaders\shader.frag -o graphics\shaders\frag.spv"
 
         os.system(cmd1.strip())
         os.system(cmd2.strip())
@@ -408,7 +408,7 @@ class Engine:
             dynamicOffsetCount = 0, pDynamicOffsets=[0,]
         )
         
-        clearColor = VkClearValue([[1.0, 0.5, 0.25, 1.0]])
+        clearColor = VkClearValue([[0.25, 0.25, 0.25, 1.0]])
         renderpassInfo.clearValueCount = 1
         renderpassInfo.pClearValues = ffi.addressof(clearColor)
         

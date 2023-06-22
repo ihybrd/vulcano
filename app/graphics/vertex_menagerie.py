@@ -23,8 +23,8 @@ class VertexMenagerie:
     
     def consume(self, meshType, vertexData: np.ndarray, indexData: list[int]):
 
-        vertexCount = int(vertexData.size // 7)
-        lastVertex = int(self.vertexLump.size // 7)
+        vertexCount = int(vertexData.size // 8)
+        lastVertex = int(self.vertexLump.size // 8)
         indexCount = len(indexData)
         lastIndex = len(self.indexLump)
 
