@@ -153,7 +153,6 @@ def create_graphics_pipeline(inputBundle: InputBundle):
         polygonMode=VK_POLYGON_MODE_FILL,
         lineWidth=1.0,
         cullMode=VK_CULL_MODE_BACK_BIT,
-        frontFace=VK_FRONT_FACE_CLOCKWISE,
         depthBiasEnable=VK_FALSE #optional transform on depth values
     )
 

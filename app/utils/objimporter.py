@@ -129,8 +129,7 @@ class OBJImporter(object):
             # msh.set_attrib(attrib_id..) must be same with the order below
 
             # notes: __vt contains position and color
-            # r += __vt[i] + __vn[i] + __tg[i] + __uv[i]
-            r += __vt[i] + __uv[i]
+            r += __vt[i] + __vn[i] + __tg[i] + __uv[i]
 
         return r, self.indices
 

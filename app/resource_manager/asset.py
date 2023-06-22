@@ -19,7 +19,7 @@ class Asset:
 
         vertices = []
         for i in m.vertices:
-            vertices += list(i)+[1,1,1,0,0] # vert, color, uv
+            vertices += list(i)+[1,1,1]+[0,0] # vert, color, uv
         indices = []
         for i in m.indices:
             indices += list(i)
@@ -29,9 +29,9 @@ class Asset:
     def load_triangle(self):
         vertices = np.array(
            [
-                0.0, -0.1, 0, 0.0, 1.0, 0.0, 0.5, 0.0,  # 0
-                0.1, 0.1, 0, 0.0, 1.0, 0.0, 1.0, 1.0,  # 1
-                -0.1, 0.1, 0, 0.0, 1.0, 0.0, 0.0, 1.0  # 2
+                0.0, -0.1, 0, 0.0, 1.0, 0.0,  0,0,1,0,0,0,  0.5, 0.0,  # 0
+                0.1, 0.1, 0, 0.0, 1.0, 0.0,   0,0,1,0,0,0,  1.0, 1.0,  # 1
+                -0.1, 0.1, 0, 0.0, 1.0, 0.0,  0,0,1,0,0,0,  0.0, 1.0   # 2
            ], dtype=np.float32
         )
         indices = [0, 1, 2]
@@ -40,10 +40,10 @@ class Asset:
     def load_square(self):
         vertices = np.array(
            [
-                -0.1, 0.1, 0, 1.0, 0.0, 0.0, 0.0, 1.0,  # 0
-                -0.1, -0.1, 0,  1.0, 0.0, 0.0, 0.0, 0.0,  # 1
-                0.1, -0.1, 0, 1.0, 0.0, 0.0, 1.0, 0.0,  # 2
-                0.1, 0.1, 0, 1.0, 0.0, 0.0, 1.0, 1.0,  # 3
+                -0.1, 0.1, 0, 1.0, 0.0, 0.0,   0,0,1,0,0,0,    0.0, 1.0,  # 0
+                -0.1, -0.1, 0, 1.0, 0.0, 0.0,  0,0,1,0,0,0,    0.0, 0.0,  # 1
+                0.1, -0.1, 0, 1.0, 0.0, 0.0,   0,0,1,0,0,0,    1.0, 0.0,  # 2
+                0.1, 0.1, 0, 1.0, 0.0, 0.0,    0,0,1,0,0,0,    1.0, 1.0,  # 3
            ], dtype=np.float32
         )
         indices = [
@@ -54,8 +54,8 @@ class Asset:
 
     def load_star(self):
         if self.use_mesh:
-            return self.load_mesh_assimp()
-            # return self.load_mesh_OBJimporter()
+            # return self.load_mesh_assimp()
+            return self.load_mesh_OBJimporter()
         else:
             vertices = np.array(
                 (

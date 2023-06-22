@@ -14,7 +14,7 @@ def get_pos_color_binding_description():
     } VkVertexInputBindingDescription;
     """
 
-    floatsPerVertex = 8
+    floatsPerVertex = 14
     bytesPerFloat = 4
     return VkVertexInputBindingDescription(
         binding = 0, stride = floatsPerVertex * bytesPerFloat, 
@@ -51,7 +51,17 @@ def get_pos_color_attribute_descriptions():
         ), # color
         VkVertexInputAttributeDescription(
             binding = 0, location = 2,
-            format = VK_FORMAT_R32G32_SFLOAT,
+            format = VK_FORMAT_R32G32B32_SFLOAT,
             offset = 6 * bytesPerFloat
+        ), # normal
+        VkVertexInputAttributeDescription(
+            binding = 0, location = 3,
+            format = VK_FORMAT_R32G32B32_SFLOAT,
+            offset = 9 * bytesPerFloat
+        ), # tangent
+        VkVertexInputAttributeDescription(
+            binding = 0, location = 4,
+            format = VK_FORMAT_R32G32_SFLOAT,
+            offset = 12 * bytesPerFloat
         ) # uv
     )
