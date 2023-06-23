@@ -315,10 +315,10 @@ class Engine:
         self.input.update()
 
         if self.input.keyboard_handler.mode:
-            self.camera_wasd.update(*self.input.load_camera_data())
+            self.camera_wasd.update(*self.input.load_free_camera_args())
             view = self.camera_wasd.view()
         else:
-            self.camera.update(self.input.mouse_handler)
+            self.camera.update(*self.input.load_camera_args())
             view = self.camera.view()
             # set wasd cam stat, todo: this should be done only the moment when the mode is changed
             self.camera_wasd.set_pos(self.camera.pos())

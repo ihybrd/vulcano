@@ -71,39 +71,15 @@ class Camera(BaseCamera):
     def view(self):
         return self.__view
 
-    def update(self, mouse_obj): #, move_x, move_y, move_z, rot_x, rot_y):
-        # only when mouse L button is pressed
-        if mouse_obj.stat == 1 and mouse_obj.button == 0:
-            # calculate ry, rx rotation value
-            self.__rot_cam(mouse_obj.dx, mouse_obj.dy)
+    def update(self, dx, dy, zoom):
+        # calculate ry, rx rotation value
+        self.__rot_cam(dx, dy)
 
-            if mouse_obj.dx != 0: self.__dx = mouse_obj.dx
-            if mouse_obj.dy != 0: self.__dy = mouse_obj.dy
-
-            if self.__last != Camera.MOVE:
-                self.__last = Camera.MOVE
+        if dx != 0: self.__dx = dx
+        if dy != 0: self.__dy = dy
 
         # calculate zoom in/out
-        elif mouse_obj.stat == 1 and mouse_obj.button == 1:
-            self.__zoom_cam(mouse_obj.dx)
-
-            if mouse_obj.dx != 0: self.__dx = mouse_obj.dx
-
-            if self.__last != Camera.ZOOM:
-                self.__last = Camera.ZOOM
-
-        elif abs(mouse_obj.dy_whl) > 0.1:
-
-            self.__zoom_cam(mouse_obj.dy_whl)
-            if self.__last != Camera.ZOOM_WHL:
-                self.__last = Camera.ZOOM_WHL
-
-        # calculate the de-acceleration
-        if mouse_obj.stat == 0:
-            if self.__last == Camera.MOVE:
-                self.__rot_cam(mouse_obj.dx, mouse_obj.dy)
-            elif self.__last == Camera.ZOOM:
-                self.__zoom_cam(mouse_obj.dx)
+        self.__zoom_cam(zoom)
 
         rx = -self.rx
         ry = -self.ry

@@ -11,6 +11,7 @@ class InputStateManager(object):
         self.keyboard_handler = keyboard.KeyboardHandler()
 
         self.is_joystick_mode = False # default
+        self.joystick_handler.cb_pressed = self.camera_mode
 
     def update(self):
         self.mouse_handler.update()
@@ -30,7 +31,14 @@ class InputStateManager(object):
                 if self.mouse_handler.stat or self.keyboard_handler.keys:
                     self.is_joystick_mode = False
 
-    def load_camera_data(self):
+    def camera_mode(self, buttonid):
+        if buttonid == 3: # triangle button
+            if self.keyboard_handler.mode:
+                self.keyboard_handler.mode = 0
+            else:
+                self.keyboard_handler.mode = 1
+
+    def load_free_camera_args(self):
         move_x, move_y, move_z = 0,0,0
         if self.joystick_handler.is_presented() and self.is_joystick_mode: # if joystick is connected, if is on
             L_h, L_v, R_h, R_v, L_tr, R_tr = self.joystick_handler.stat.axes
@@ -81,3 +89,39 @@ class InputStateManager(object):
             if not self.keyboard_handler.keys:
                 move_x, move_y, move_z = 0, 0, 0
         return move_x, move_y, move_z, rot_x, rot_y
+
+    def load_camera_args(self):
+        if self.joystick_handler.is_presented() and self.is_joystick_mode:  # if joystick is connected, if is on
+            L_h, L_v, R_h, R_v, L_tr, R_tr = self.joystick_handler.stat.axes
+
+            R_v = 0 if abs(R_v)<0.1 else R_v*1.5
+            R_h = 0 if abs(R_h)<0.1 else R_h*1.5
+            L_tr = (L_tr + 1.0) * 0.5
+            R_tr = (R_tr + 1.0) * 0.5
+
+            zoom = 0
+
+            if any([L_tr, R_tr]):
+                if L_tr:
+                    zoom = -L_tr*.1
+                elif R_tr:
+                    zoom = R_tr*.1
+
+            return R_h, R_v, zoom
+        else:
+            dx = self.mouse_handler.dx
+            zoom = 0
+            if self.mouse_handler.stat == 1 and self.mouse_handler.button == 0:
+                pass
+            # calculate ry, rx rotation value
+            # calculate zoom in/out
+            elif self.mouse_handler.stat == 1 and self.mouse_handler.button == 1:
+                zoom = dx
+            elif abs(self.mouse_handler.dy_whl) > 0.1:
+                zoom = self.mouse_handler.dy_whl # overried dx with wheel values
+
+            # calculate the de-acceleration
+            elif self.mouse_handler.stat == 0:
+                stat = None
+
+            return dx, self.mouse_handler.dy, zoom
