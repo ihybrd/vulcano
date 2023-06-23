@@ -40,8 +40,6 @@ class Engine:
         self.camera = camera.Camera()
         self.camera_wasd = camera.CameraWasd()
 
-        self.use_wasd_cam = True
-    
     def make_instance(self):
 
         self.instance = instance.make_instance("")
@@ -314,10 +312,6 @@ class Engine:
 
         _frame: frame.SwapChainFrame = self.swapchainFrames[imageIndex]
 
-        position = np.array([1, 0, -1],dtype=np.float32)
-        target = np.array([0, 0, 0],dtype=np.float32)
-        up = np.array([0, 0, -1],dtype=np.float32)
-        # _frame.cameraData.view = pyrr.matrix44.create_look_at(position, target, up, dtype=np.float32)
         self.input.update()
 
         if self.input.keyboard_handler.mode:
@@ -326,6 +320,9 @@ class Engine:
         else:
             self.camera.update(self.input.mouse_handler)
             view = self.camera.view()
+            # set wasd cam stat, todo: this should be done only the moment when the mode is changed
+            self.camera_wasd.set_pos(self.camera.pos())
+            self.camera_wasd.set_rot(self.camera.rx, self.camera.ry)
 
         _frame.cameraData.view = view
 

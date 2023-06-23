@@ -10,7 +10,7 @@ class InputStateManager(object):
         self.joystick_handler = joystick.JoyStickHandler()
         self.keyboard_handler = keyboard.KeyboardHandler()
 
-        self.is_joystick_mode = True
+        self.is_joystick_mode = False # default
 
     def update(self):
         self.mouse_handler.update()
@@ -32,7 +32,7 @@ class InputStateManager(object):
 
     def load_camera_data(self):
         move_x, move_y, move_z = 0,0,0
-        if self.is_joystick_mode:
+        if self.joystick_handler.is_presented() and self.is_joystick_mode: # if joystick is connected, if is on
             L_h, L_v, R_h, R_v, L_tr, R_tr = self.joystick_handler.stat.axes
 
             # rotate cam

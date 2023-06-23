@@ -142,7 +142,7 @@ class CameraWasd(BaseCamera):
     def __init__(self):
         super(CameraWasd, self).__init__()
 
-        self.look_tar = cgmath.Vector4(0, 0, 1, 1)
+        self.look_dir = cgmath.Vector4(0, 0, 1, 1)
         # self.tar_pos = [0,0,1,1]
         self.V = cgmath.Vector4(0, 0, 0, 1)
         self.T = cgmath.Matrix4x4()
@@ -175,6 +175,13 @@ class CameraWasd(BaseCamera):
 
     def pos(self):
         return self.__pos
+
+    def set_pos(self, pos):
+        self.__pos = pos
+
+    def set_rot(self, rx, ry):
+        self.rx = rx
+        self.ry = ry
 
     def view(self):
         return self.__view
@@ -215,7 +222,7 @@ class CameraWasd(BaseCamera):
         # get current position
         x, y, z, w = self.V.to_matrix().multiply(T).to_list()
         # get look target position
-        tar_x, tar_y, tar_z, _ = self.look_tar.to_matrix().multiply(T).to_list()
+        tar_x, tar_y, tar_z, _ = self.look_dir.to_matrix().multiply(T).to_list()
 
         # get vector from target(x) to v_pos(o), x is where camera is pointing.
         # while y is up.

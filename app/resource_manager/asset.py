@@ -18,8 +18,8 @@ class Asset:
         m = scene.meshes[0]
 
         vertices = []
-        for i in m.vertices:
-            vertices += list(i)+[1,1,1]+[0,0] # vert, color, uv
+        for id, verts in enumerate(m.vertices):
+            vertices += list(verts)+[1,1,1]+list(m.normals[id])+list(m.tangents[id])+[0,0] # vert, color, uv
         indices = []
         for i in m.indices:
             indices += list(i)
@@ -54,8 +54,8 @@ class Asset:
 
     def load_star(self):
         if self.use_mesh:
-            # return self.load_mesh_assimp()
-            return self.load_mesh_OBJimporter()
+            return self.load_mesh_assimp()
+            # return self.load_mesh_OBJimporter()
         else:
             vertices = np.array(
                 (
