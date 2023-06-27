@@ -29,6 +29,7 @@ class ImageCreationChunk:
         self.tiling = None
         self.usage = None
         self.memoryProperties = None
+        self.format = None
 
 class ImageLayoutTransitionJob:
 
@@ -73,6 +74,7 @@ class Texture:
         imageInfo.width = self.width
         imageInfo.logicalDevice = self.logicalDevice
         imageInfo.physicalDevice = self.physicalDevice
+        imageInfo.format = VK_FORMAT_R8G8B8A8_UNORM
         imageInfo.memoryProperties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
         imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL
         imageInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT \
@@ -167,7 +169,8 @@ class Texture:
     def make_view(self):
 
         self.imageView = make_image_view(
-            self.logicalDevice, self.image, VK_FORMAT_R8G8B8A8_UNORM
+            self.logicalDevice, self.image, VK_FORMAT_R8G8B8A8_UNORM,
+            VK_IMAGE_ASPECT_COLOR_BIT
         )
 
     def make_sampler(self):
@@ -268,7 +271,7 @@ def make_image(info: ImageCreationChunk):
         imageType = VK_IMAGE_TYPE_2D, 
         extent = VkExtent3D(info.width, info.height, 1),
         mipLevels = 1, arrayLayers = 1,
-        format = VK_FORMAT_R8G8B8A8_UNORM, tiling = info.tiling,
+        format = info.format, tiling = info.tiling,
         initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
         usage = info.usage, sharingMode = VK_SHARING_MODE_EXCLUSIVE,
         samples = VK_SAMPLE_COUNT_1_BIT
@@ -404,7 +407,7 @@ def copy_buffer_to_image(job: ImageCopyJob):
 
     single_time_commands.end_job(job.commandBuffer, job.queue)
 
-def make_image_view(logicalDevice, image, format):
+def make_image_view(logicalDevice, image, format, aspect):
 
     components = VkComponentMapping(
         r = VK_COMPONENT_SWIZZLE_IDENTITY,
@@ -414,7 +417,7 @@ def make_image_view(logicalDevice, image, format):
     )
 
     subresourceRange = VkImageSubresourceRange(
-        aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+        aspectMask = aspect,
         baseMipLevel = 0, levelCount = 1,
         baseArrayLayer = 0, layerCount = 1
     )
@@ -428,3 +431,13 @@ def make_image_view(logicalDevice, image, format):
     return vkCreateImageView(
         device = logicalDevice, pCreateInfo = create_info, pAllocator = None
     )
+
+def find_supported_format(physicalDevice, candidates, tiling, features):
+    for format in candidates:
+        properties = vkGetPhysicalDeviceFormatProperties(physicalDevice, format)
+
+        if tiling == VK_IMAGE_TILING_LINEAR and (properties.linearTilingFeatures & features)==features:
+            return format
+        if tiling == VK_IMAGE_TILING_OPTIMAL and (properties.optimalTilingFeatures & features)==features:
+            return format
+    raise ("Unable to find suitable format")

@@ -93,7 +93,15 @@ class Engine:
         self.swapchainFormat = bundle.format
         self.swapchainExtent = bundle.extent
         self.maxFramesInFlight = len(self.swapchainFrames)
-    
+
+        for frame in self.swapchainFrames:
+            frame.logicalDevice = self.device
+            frame.physicalDevice = self.physicalDevice
+            frame.width = self.swapchainExtent.width
+            frame.height = self.swapchainExtent.height
+
+            frame.make_depth_resources(self.device, self.physicalDevice)
+
     def recreate_swapchain(self):
         """
             Destroy the current swapchain, then rebuild a new one
@@ -167,6 +175,7 @@ class Engine:
         inputBundle = pipeline.InputBundle(
             device = self.device,
             swapchainImageFormat = self.swapchainFormat,
+            depthFormat = self.swapchainFrames[0].depthFormat,
             swapchainExtent = self.swapchainExtent,
             vertexFilepath = graph_dir+"shaders/vert.spv",
             fragmentFilepath = graph_dir+"shaders/frag.spv",
@@ -399,11 +408,14 @@ class Engine:
             vkBeginCommandBuffer(commandBuffer, beginInfo)
         except:
             vklogging.logger.print("Failed to begin recording command buffer")
-        
+
+        clearValues = [VkClearValue(color=[[0.25, 0.25, 0.25, 1.0]]), VkClearValue(depthStencil=[1.0, 0])]
+
         renderpassInfo = VkRenderPassBeginInfo(
             renderPass = self.renderpass,
             framebuffer = self.swapchainFrames[imageIndex].framebuffer,
-            renderArea = [[0,0], self.swapchainExtent]
+            renderArea = [[0,0], self.swapchainExtent],
+            pClearValues=clearValues
         )
 
         vkCmdBindDescriptorSets(
@@ -414,11 +426,6 @@ class Engine:
             pDescriptorSets=[self.swapchainFrames[imageIndex].descriptorSet,],
             dynamicOffsetCount = 0, pDynamicOffsets=[0,]
         )
-        
-        clearColor = VkClearValue([[0.25, 0.25, 0.25, 1.0]])
-        renderpassInfo.clearValueCount = 1
-        renderpassInfo.pClearValues = ffi.addressof(clearColor)
-        
         vkCmdBeginRenderPass(commandBuffer, renderpassInfo, VK_SUBPASS_CONTENTS_INLINE)
         
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, self.pipeline)
@@ -564,7 +571,7 @@ class Engine:
                 buffer = frame.modelBuffer.buffer,
                 pAllocator = None
             )
-        
+
         vkDestroyDescriptorPool(self.device, self.descriptorPool, None)
         
         destructionFunction = vkGetDeviceProcAddr(self.device, 'vkDestroySwapchainKHR')

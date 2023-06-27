@@ -14,11 +14,11 @@ def make_framebuffers(inputChunk, frames):
 
     for i,frame in enumerate(frames):
 
-        attachments = [frame.image_view,]
+        attachments = [frame.image_view, frame.depth_buffer_view]
 
         framebufferInfo = VkFramebufferCreateInfo(
             renderPass = inputChunk.renderpass,
-            attachmentCount = 1,
+            attachmentCount = len(attachments),
             pAttachments = attachments,
             width = inputChunk.swapchainExtent.width,
             height = inputChunk.swapchainExtent.height,

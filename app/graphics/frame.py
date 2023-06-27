@@ -1,5 +1,6 @@
 from config import *
 import memory
+import image
 
 class UBO:
 
@@ -18,7 +19,15 @@ class SwapChainFrame:
         #swapchain
         self.image = None
         self.image_view = None
+        self.depth_buffer_view = None
         self.framebuffer = None
+
+        self.depthBuffer = None
+        self.depthBufferMemory = None
+        self.depthBufferView = None
+        self.depthFormat = None
+        self.width = None
+        self.height = None
 
         self.commandbuffer = None
 
@@ -91,6 +100,28 @@ class SwapChainFrame:
             buffer = self.modelBuffer.buffer, offset = 0, range = bufferSize
         )
     
+    def make_depth_resources(self, logicalDevice, physicalDevice):
+        self.depthFormat = image.find_supported_format(
+            physicalDevice,
+            [VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT],
+            VK_IMAGE_TILING_OPTIMAL,
+            VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
+        )
+
+        imageInfo = image.ImageCreationChunk()
+
+        imageInfo.logicalDevice = logicalDevice
+        imageInfo.physicalDevice = physicalDevice
+        imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL
+        imageInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT
+        imageInfo.memoryProperties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+        imageInfo.width = self.width
+        imageInfo.height = self.height
+        imageInfo.format = self.depthFormat
+        self.depthBuffer = image.make_image(imageInfo)
+        self.depthBufferMemory = image.make_image_memory(imageInfo, self.depthBuffer)
+        self.depth_buffer_view = image.make_image_view(logicalDevice, self.depthBuffer, self.depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT) # vkImage::make_image_view(
+
     def write_descriptor_set(self, device):
 
         """
@@ -133,3 +164,22 @@ class SwapChainFrame:
             pDescriptorWrites = descriptorWrites, 
             descriptorCopyCount = 0, pDescriptorCopies = None
         )
+
+    def destroy(self, logicalDevice):
+        logicalDevice.destroyImageView(self.image_view)
+        logicalDevice.destroyFramebuffer(self.framebuffer)
+        logicalDevice.destroyFence(self.inFlight)
+        logicalDevice.destroySemaphore(self.imageAvailable)
+        logicalDevice.destroySemaphore(self.renderFinished)
+
+        logicalDevice.unmapMemory(self.cameraData.bufferMemory)
+        logicalDevice.freeMemory(self.cameraData.bufferMemory)
+        logicalDevice.destroyBuffer(self.cameraData.buffer)
+
+        logicalDevice.unmapMemory(self.modelBuffer.bufferMemory)
+        logicalDevice.freeMemory(self.modelBuffer.bufferMemory)
+        logicalDevice.destroyBuffer(self.modelBuffer.buffer)
+
+        logicalDevice.destroyImage(self.depthBuffer)
+        logicalDevice.freeMemory(self.depthBufferMemory)
+        logicalDevice.destroyImageView(self.depth_buffer_view)

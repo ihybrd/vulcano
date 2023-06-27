@@ -171,7 +171,7 @@ def create_swapchain(instance, logicalDevice, physicalDevice, surface, width, he
         swapchain_frame = frame.SwapChainFrame()
         swapchain_frame.image = _image
         swapchain_frame.image_view = image.make_image_view(
-            logicalDevice, _image, format.format
+            logicalDevice, _image, format.format, VK_IMAGE_ASPECT_COLOR_BIT
         )
         bundle.frames.append(swapchain_frame)
     

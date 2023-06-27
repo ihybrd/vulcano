@@ -7,12 +7,13 @@ class InputBundle:
 
 
     def __init__(self, device, 
-    swapchainImageFormat, swapchainExtent, 
+    swapchainImageFormat, depthFormat, swapchainExtent,
     vertexFilepath, fragmentFilepath,
     descriptorSetLayouts):
 
         self.device = device
         self.swapchainImageFormat = swapchainImageFormat
+        self.depthFormat = depthFormat
         self.swapchainExtent = swapchainExtent
         self.vertexFilepath = vertexFilepath
         self.fragmentFilepath = fragmentFilepath
@@ -27,8 +28,9 @@ class OuputBundle:
         self.renderPass = renderPass
         self.pipeline = pipeline
 
-def create_render_pass(device, swapchainImageFormat):
-    
+
+def create_render_pass(device, swapchainImageFormat, depthFormat):
+
     colorAttachment = VkAttachmentDescription(
         format = swapchainImageFormat,
         samples = VK_SAMPLE_COUNT_1_BIT,
@@ -43,21 +45,42 @@ def create_render_pass(device, swapchainImageFormat):
         finalLayout=VK_IMAGE_LAYOUT_PRESENT_SRC_KHR 
     )
 
+    depthAttachment = VkAttachmentDescription(
+        format=depthFormat,
+        samples=VK_SAMPLE_COUNT_1_BIT,# VK_SAMPLE_COUNT_1_BIT,
+
+        loadOp=VK_ATTACHMENT_LOAD_OP_CLEAR,
+        storeOp=VK_ATTACHMENT_STORE_OP_DONT_CARE,
+
+        stencilLoadOp=VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+        stencilStoreOp=VK_ATTACHMENT_STORE_OP_DONT_CARE,
+
+
+        initialLayout=VK_IMAGE_LAYOUT_UNDEFINED,
+        finalLayout=VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+    )
+
     colorAttachmentRef = VkAttachmentReference(
         attachment=0,
         layout=VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
     )
 
+    depthAttachmentRef = VkAttachmentReference(
+        attachment=1,
+        layout=VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+    )
+
     subpass = VkSubpassDescription(
         pipelineBindPoint=VK_PIPELINE_BIND_POINT_GRAPHICS,
         colorAttachmentCount=1,
-        pColorAttachments=colorAttachmentRef
+        pColorAttachments=colorAttachmentRef,
+        pDepthStencilAttachment=depthAttachmentRef
     )
 
     renderPassInfo = VkRenderPassCreateInfo(
         sType=VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
-        attachmentCount=1,
-        pAttachments=colorAttachment,
+        attachmentCount=2,
+        pAttachments=[colorAttachment, depthAttachment],
         subpassCount=1,
         pSubpasses=subpass
     )
@@ -156,6 +179,16 @@ def create_graphics_pipeline(inputBundle: InputBundle):
         depthBiasEnable=VK_FALSE #optional transform on depth values
     )
 
+    # depth stencil
+    depthState = VkPipelineDepthStencilStateCreateInfo(
+        # flags = vk::PipelineDepthStencilStateCreateFlags();
+        depthTestEnable= True,
+        depthWriteEnable= True,
+        depthCompareOp = VK_COMPARE_OP_LESS,
+        depthBoundsTestEnable=False,
+        stencilTestEnable=False
+    )
+
     #multisampling parameters
     multisampling = VkPipelineMultisampleStateCreateInfo(
         sType=VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
@@ -192,7 +225,7 @@ def create_graphics_pipeline(inputBundle: InputBundle):
 
     pipelineLayout = create_pipeline_layout(
         inputBundle.device, inputBundle.descriptorSetLayouts)
-    renderPass = create_render_pass(inputBundle.device, inputBundle.swapchainImageFormat)
+    renderPass = create_render_pass(inputBundle.device, inputBundle.swapchainImageFormat, inputBundle.depthFormat)
 
     pipelineInfo = VkGraphicsPipelineCreateInfo(
         sType=VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
@@ -203,7 +236,7 @@ def create_graphics_pipeline(inputBundle: InputBundle):
         pViewportState=viewportState,
         pRasterizationState=raterizer,
         pMultisampleState=multisampling,
-        pDepthStencilState=None,
+        pDepthStencilState=depthState,
         pColorBlendState=colorBlending,
         layout=pipelineLayout,
         renderPass=renderPass,
