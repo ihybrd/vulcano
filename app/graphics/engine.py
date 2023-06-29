@@ -323,7 +323,7 @@ class Engine:
 
         self.input.update()
 
-        if self.input.keyboard_handler.mode:
+        if self.input.camera_mode:
             self.camera_wasd.update(*self.input.load_free_camera_args())
             view = self.camera_wasd.view()
         else:

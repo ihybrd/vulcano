@@ -35,10 +35,10 @@ class App(object):
         glfw.window_hint(GLFW_CONSTANTS.GLFW_RESIZABLE, GLFW_CONSTANTS.GLFW_TRUE)
 
         # create_window(int width, int height, const char *title, GLFWmonitor *monitor, GLFWwindow *share)
-        self.window = glfw.create_window(width, height, "ID Tech 12", None, None)
+        self.window = glfw.create_window(width, height, "Vulcano", None, None)
         if self.window is not None:
             vklogging.logger.print(
-                f"Successfully made a glfw window called \"ID Tech 12\", width: {width}, height: {height}"
+                f"Successfully made a glfw window called \"Vulcano\", width: {width}, height: {height}"
             )
         else:
             vklogging.logger.print("GLFW window creation failed")
@@ -50,7 +50,24 @@ class App(object):
         glfw.set_scroll_callback(self.window, self.input_manager.mouse_handler.mouse_wheel)
 
         # keyboard callback
-        glfw.set_key_callback(self.window, self.input_manager.keyboard_handler.key_pressed)
+        glfw.set_key_callback(self.window, self.input_manager.set_key)
+
+    def prompt(self):
+        if int(self.currentTime) % 2 == 0:
+            pointer = "_"
+        else:
+            pointer = " "
+
+        if self.input_manager.command_mode:
+            input = self.input_manager.command.input
+            ppos = self.input_manager.command.cursor_pos
+            if len(input) >= 0:
+                in1 = input[:ppos]
+                in2 = input[ppos:] if ppos<len(input) else ""
+                i = in1 + pointer + in2
+            glfw.set_window_title(self.window, "Vulcano > " + i)
+        else:
+            glfw.set_window_title(self.window, "Vulcano")
 
     def calculate_framerate(self):
 
@@ -59,7 +76,7 @@ class App(object):
 
         if delta >= 1:
             framerate = max(1, int(self.numFrames // delta))
-            glfw.set_window_title(self.window, f"Running at {framerate} fps.")
+            # glfw.set_window_title(self.window, f"Running at {framerate} fps.")
             self.lastTime = self.currentTime
             self.numFrames = -1
             self.frameTime = 1000.0 / framerate
@@ -72,6 +89,7 @@ class App(object):
             glfw.poll_events()
             self.graphicsEngine.render(self.scene)
             self.calculate_framerate()
+            self.prompt()
 
     def close(self):
 

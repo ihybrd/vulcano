@@ -1,7 +1,8 @@
 import app.engine.mouse as mouse
 import app.engine.keyboard as keyboard
 import app.engine.joystick as joystick
-
+import app.engine.commandline as commandline
+import glfw
 
 class InputStateManager(object):
 
@@ -9,9 +10,13 @@ class InputStateManager(object):
         self.mouse_handler = mouse.MouseHandler()
         self.joystick_handler = joystick.JoyStickHandler()
         self.keyboard_handler = keyboard.KeyboardHandler()
+        self.command = commandline.CommandLine()
 
         self.is_joystick_mode = False # default
         self.joystick_handler.cb_pressed = self.camera_mode
+
+        self.camera_mode = 0
+        self.command_mode = 0
 
     def update(self):
         self.mouse_handler.update()
@@ -33,10 +38,7 @@ class InputStateManager(object):
 
     def camera_mode(self, buttonid):
         if buttonid == 3: # triangle button
-            if self.keyboard_handler.mode:
-                self.keyboard_handler.mode = 0
-            else:
-                self.keyboard_handler.mode = 1
+            self.camera_mode = 0 if self.camera_mode else 1
 
     def load_free_camera_args(self):
         move_x, move_y, move_z = 0,0,0
@@ -72,22 +74,24 @@ class InputStateManager(object):
                 move_y += R_tr*.1
         else:
             rot_x, rot_y = self.mouse_handler.dx, self.mouse_handler.dy
-
-            move_speed = 0.05
-            if 87 in self.keyboard_handler.keys:
-                move_x += move_speed  # w
-            if 83 in self.keyboard_handler.keys:
-                move_x -= move_speed  # s
-            if 65 in self.keyboard_handler.keys:
-                move_z -= move_speed  # a
-            if 68 in self.keyboard_handler.keys:
-                move_z += move_speed  # d
-            if 81 in self.keyboard_handler.keys:
-                move_y -= move_speed  # q
-            if 69 in self.keyboard_handler.keys:
-                move_y += move_speed  # e
-            if not self.keyboard_handler.keys:
+            if self.command_mode:
                 move_x, move_y, move_z = 0, 0, 0
+            else:
+                move_speed = 0.05
+                if 87 in self.keyboard_handler.keys:
+                    move_x += move_speed  # w
+                if 83 in self.keyboard_handler.keys:
+                    move_x -= move_speed  # s
+                if 65 in self.keyboard_handler.keys:
+                    move_z -= move_speed  # a
+                if 68 in self.keyboard_handler.keys:
+                    move_z += move_speed  # d
+                if 81 in self.keyboard_handler.keys:
+                    move_y -= move_speed  # q
+                if 69 in self.keyboard_handler.keys:
+                    move_y += move_speed  # e
+                if not self.keyboard_handler.keys:
+                    move_x, move_y, move_z = 0, 0, 0
         return move_x, move_y, move_z, rot_x, rot_y
 
     def load_camera_args(self):
@@ -96,16 +100,9 @@ class InputStateManager(object):
 
             R_v = 0 if abs(R_v)<0.1 else R_v*1.5
             R_h = 0 if abs(R_h)<0.1 else R_h*1.5
-            L_tr = (L_tr + 1.0) * 0.5
-            R_tr = (R_tr + 1.0) * 0.5
+            L_v = 0 if abs(L_v)<0.1 else L_v*.5
 
-            zoom = 0
-
-            if any([L_tr, R_tr]):
-                if L_tr:
-                    zoom = -L_tr*.1
-                elif R_tr:
-                    zoom = R_tr*.1
+            zoom = -L_v
 
             return R_h, R_v, zoom
         else:
@@ -125,3 +122,21 @@ class InputStateManager(object):
                 stat = None
 
             return dx, self.mouse_handler.dy, zoom
+
+    def set_key(self, win, *args):
+        self.keyboard_handler.set_key(win, *args)
+
+        # command mode on/off
+        if self.keyboard_handler.key == glfw.KEY_GRAVE_ACCENT and self.keyboard_handler.released:
+            self.command_mode = 0 if self.command_mode else 1
+
+        if self.command_mode == 1:  # **Command Mode
+            if self.keyboard_handler.pressed:
+                self.command.pressed(self.keyboard_handler.key, self.keyboard_handler.char)
+
+            if self.keyboard_handler.pressing:
+                self.command.pressing(self.keyboard_handler.key, self.keyboard_handler.char)
+        else:
+            if self.keyboard_handler.key == glfw.KEY_TAB and self.keyboard_handler.pressed:
+                self.camera_mode = 0 if self.camera_mode else 1
+
